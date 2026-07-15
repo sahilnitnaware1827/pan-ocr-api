@@ -2,27 +2,37 @@ from fastapi import APIRouter, UploadFile, File
 import os
 import shutil
 
+from app.services.ocr_service import load_image
+
 router = APIRouter()
 
 UPLOAD_DIR = "uploads"
 
-# Create uploads folder if it doesn't exist
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 @router.post("/upload")
 async def upload_image(image: UploadFile = File(...)):
-    """
-    Upload an image and save it to the uploads folder.
-    """
 
-    file_path = os.path.join(UPLOAD_DIR, image.filename)
+    file_path = os.path.join(
+        UPLOAD_DIR,
+        image.filename
+    )
 
-    # Save the uploaded image
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
 
+    # Load image using OpenCV
+    loaded_image = load_image(file_path)
+
+    # Validate image
+    if loaded_image is None:
+        return {
+            "message": "Failed to load image."
+        }
+
     return {
         "message": "Image uploaded successfully.",
-        "filename": image.filename
+        "filename": image.filename,
+        "status": "Image loaded successfully."
     }
