@@ -17,3 +17,15 @@ def load_image(file_path: str):
     image = cv2.imread(file_path)
 
     return image
+
+
+
+
+
+def preprocess_image(image):
+    """
+    Convert the image to grayscale.
+    More preprocessing steps can be added later.
+    """
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return gray

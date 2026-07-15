@@ -2,7 +2,10 @@ from fastapi import APIRouter, UploadFile, File
 import os
 import shutil
 
-from app.services.ocr_service import load_image
+from app.services.ocr_service import (
+    load_image,
+    preprocess_image
+)
 
 router = APIRouter()
 
@@ -22,17 +25,17 @@ async def upload_image(image: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
 
-    # Load image using OpenCV
     loaded_image = load_image(file_path)
 
-    # Validate image
     if loaded_image is None:
         return {
             "message": "Failed to load image."
         }
 
+    processed_image = preprocess_image(loaded_image)
+
     return {
         "message": "Image uploaded successfully.",
         "filename": image.filename,
-        "status": "Image loaded successfully."
+        "image_shape": list(processed_image.shape)
     }
